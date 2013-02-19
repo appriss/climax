@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+# -*- ruby-mode -*-
+$:.unshift(File.expand_path("../../lib", __FILE__))
+require "hello_world"
+HelloWorld::Application.new(ARGV).run
