@@ -112,7 +112,9 @@ module Climax
 
     # Run the application
     def run
+      pre_main
       _event_loop
+      post_main
     end
 
     # Return current options.  nil until ClimaxApplication::new has finished running
