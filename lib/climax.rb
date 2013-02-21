@@ -176,6 +176,18 @@ module Climax
       @events_mutex ||= Mutex.new
     end
 
+    def post_initialize
+    end
+
+    def main
+      raise "Please implement a main() method for your application."
+    end
+
+    def pre_main
+    end
+
+    def post_main
+    end
 
   end
 end
