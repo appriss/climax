@@ -7,21 +7,21 @@ daemon, processing command line arguments, and something else unexpected.  When 
 uses climax, a control DRb runs with your application, allowing you to manipulate your application
 as it runs in the background.  For instance, if your application is running, you can remotely debug
 the application at any time.  This is great for long-running processes in production.  Something
-strange going on that you\'d like to investigate?  Use the control drb to change the log level from
-\"info\" to \"debug\" to get more info.  Still confused?  Attach a debugger to the running process.
+strange going on that you'd like to investigate?  Use the control drb to change the log level from
+"info" to "debug" to get more info.  Still not sure what's happening?  Attach a debugger to the running process.
 
 You get all of these features for free when your application uses climax.
 
 Installation
 ============
 
-To install climax simply install the climax gem: *`gem install climax`* or alternatively place *`gem
-"climax"`* in your application\'s Gemfile and run bundler.
+To install climax simply install the climax gem: `gem install climax` or alternatively place `gem
+"climax"` in your application's Gemfile and run bundler.
 
 Getting Started
 ===============
 
-It\'s easy to get started.  Just include the `Climax::Application` module into your application
+It's easy to get started.  Just include the `Climax::Application` module into your application
 class:
 
     require 'climax'
@@ -38,7 +38,7 @@ class:
     MyApplication.new(ARGV).run()
 
 The above example is about as simple as you can get.  Here we define an application and give it a
-`main` method.  The `main` method will be called REPEATADLY until it returns a value other than nil.
+`main` method.  The `main` method will be called REPEATEDLY until it returns a value other than nil.
 In the example above `main` will only be called once because it returns `0`.
 
 If you save the above example in a file and run it with `--help` you will get a list of default
@@ -76,7 +76,7 @@ The climax framework then runs your application as follows:
  * Calls the `post_main` method of your application class if it exists.  This is a good place to put
    code that should run once when your application is exiting.
 
-Here is a slightly larger example that shows more of climax\'s features:
+Here is a slightly larger example that shows more of climax's features:
 
     require 'climax'
     
@@ -114,13 +114,13 @@ Control DRb is used then the application will exit in an orderly fashion and the
 will be called.  Notice that for free you can fork this application, change the log level with the
 `--log-level` option, write the logs to a file using the `--log-file` option, and you can start a
 debugger at any time while this application is running using the Control DRb.  The Control DRb has a
-lot of power.  We\'ll talk about it more below.
+lot of power.  We'll talk about it more below.
 
 Climax Event Queue
 ==================
 
 An important concept to understand is that climax handles events that come in from the Control DRb.
-DRb\'s by necessity run in a separate thread.  However, climax makes absolutely no assumptions about
+DRb's by necessity run in a separate thread.  However, climax makes absolutely no assumptions about
 the thread-safeness of your application.  **You do not need to write thread safe applications.**
 Climax is written in such a way that it simply places events into a thread safe queue.  Every time
 your `main` method completes, any existing events in the queue are processed.  Your `main` method is
