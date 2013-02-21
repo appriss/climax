@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = Climax::VERSION
   s.authors     = ["Alfred J. Fazio"]
   s.email       = ["alfred.fazio@gmail.com"]
-  s.homepage    = "https://github.com/afazio/climax"
+  s.homepage    = "https://github.com/appriss/climax"
   s.summary     = %q{Ruby command line application framework}
   s.description = %q{Opinionated framework for Ruby CLI applications that provides logging, cli argument parsing, daemonizing, configuration, testing, and even remote control of long running processes}
 
