@@ -14,6 +14,7 @@ module HelloWorld
     def main
       puts "Hello World!"
       sleep 3
+      return nil
     end
   end
 end

@@ -12,20 +12,35 @@ module Climax
       @args = args.dup
       options do
         on :d, :daemon,    "Fork application and run in background"
-        on :control_port=, "Override the port for the control DRb to listen on.  Default is 7249", :as => :int, :default => 7249
         on :log_level=,    "Set to debug, info, warn, error, or fatal.  Default: info.", :default => "info"
         on :log_file=,     "File to log output to.  By default logs to stdout.", :default => nil
+        on :control_port=, "Override the port for the control DRb to listen on.  Default is 7249", :as => :int, :default => 7249
       end
-      post_initialize
-      slop.parse
-      @opts = slop
+      configure
+      _parse_options
+    end
+
+    def _pre_main
       if daemonize?
         exit 0 if !Process.fork.nil?
         log.debug "Running in background (#{$$})"
       end
+
       log.debug "Starting Control DRb on port #{control_port}"
       @control_drb = Climax::ControlDRb.new(self, control_port)
-      run
+    end
+
+    def _post_main
+      log.debug "Stopping Control DRb"
+      @control_drb.stop_service
+    end
+
+    def _parse_options
+      slop.parse!
+      @opts = slop
+      exit 0 if opts.help?
+    rescue => e
+      abort("#{e.message}\n#{slop.to_s}")
     end
 
     def daemonize?
@@ -98,7 +113,7 @@ module Climax
 
     # Return instance of Slop
     def slop
-      @slop ||= Slop.new
+      @slop ||= Slop.new(:strict => true, :help => true)
     end
 
     # Method for wrapping calls to on() and banner().  Simply for readability.
@@ -112,9 +127,18 @@ module Climax
 
     # Run the application
     def run
+      _pre_main
       pre_main
-      _event_loop
+      @exit_status = _event_loop
+      _post_main
       post_main
+
+      exit exit_status if exit_status.is_a? Fixnum
+      abort(exit_status.to_s)
+    end
+
+    def exit_status
+      @exit_status
     end
 
     # Return current options.  nil until ClimaxApplication::new has finished running
@@ -138,21 +162,22 @@ module Climax
 
     def _event_loop
       while true
-        event = _next_event
 
-        unless event.nil?
-          case event.type
-          when :set_log_level then log_level = event.payload
-          when :start_remote_debugger then binding.remote_pry
-          when :quit then exit
+        begin
+          event = _next_event
+
+          unless event.nil?
+            case event.type
+            when :set_log_level then log_level = event.payload
+            when :stop_control_drb then @control_drb && @control_drb.stop_service
+            when :start_remote_debugger then binding.remote_pry
+            when :quit, :exit then return 0
+            end
           end
-        end
+        end while !event.nil?
 
         result = main
-
-        exit result if result.is_a? Fixnum
-        raise result if result.is_a? String
-        raise "Unrecognized return value type: (#{result.class}: #{result}).  Only recognize strings, ints, or nil" if !result.nil?
+        return result if !result.nil?
       end
     end
 
@@ -176,7 +201,7 @@ module Climax
       @events_mutex ||= Mutex.new
     end
 
-    def post_initialize
+    def configure
     end
 
     def main
