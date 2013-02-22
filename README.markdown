@@ -162,3 +162,53 @@ debugger will not begin until the current iteration of `main` has completed.
 This is excellent for stopping a long running process without interrupting its work.  By sending an
 :exit or :quit event, whether through the Control DRb or from your application itself, your
 application will be allowed to finish processing its current unit of work before exiting.
+
+Generating a New Application
+============================
+
+To help you get started quickly, you can easily generate a new application using climax by running
+the following command:
+
+    climax create <project-name>
+
+Climax will then create a new project for you that is ready to rock and roll.  Here is the file
+structure generated for a new project named "my_project":
+
+    my_project/
+      Gemfile
+      LICENSE.txt
+      README.md
+      Rakefile
+      bin/
+        my_project*
+      features/
+        step_definitions/
+        support/
+          io.rb
+          env.rb
+      lib/
+        my_project.rb
+        my_project/
+          version.rb
+      my_project.gemspec
+      pkg
+
+Your new application has the boilerplate code necessary to start running your application immediately:
+
+    cd my_project
+    ./bin/my_project --help
+    Usage: my_project [options]
+        -d, --daemon            Fork application and run in background
+            --log_level         Set to debug, info, warn, error, or fatal.  Default: info.
+            --log_file          File to log output to.  By default logs to stdout.
+            --control_port      Override the port for the control DRb to listen on.  Default is 7249
+        -h, --help              Display this help message.
+
+Running the application will simply print `"Hello World"` until you hit `Ctrl-C`.
+
+The three files you will want to modify are `README.md` (with info about your application),
+`*<project-name>*.gemspec` and `lib/*<project-name>*.rb`.
+
+There are some basic cucumber tests provided for you.  Just run `cucumber` to see those tests run.
+
+You can bundle your application with `gem bundle *.gemspec`.
