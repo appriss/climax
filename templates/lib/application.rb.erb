@@ -1,0 +1,37 @@
+require "climax"
+require "<%= name %>/version"
+
+<% indent = 0 %>
+<% module_path.each do |m| %>
+<%=  (" "*indent) + "module #{m}\n" %>
+<%   indent = indent + 2 %>
+<% end %>
+
+  class Application
+    include Climax::Application
+
+    def configure
+      # options do
+      #   on 'v', 'verbose', 'More verbose'
+      # end
+    end
+
+    def pre_main
+      # log.debug "Application has is about to run"
+    end
+
+    def main
+      log.info "Hello World!"
+      sleep 1
+      return nil
+    end
+
+    def post_main
+      # log.debug "Application is shutting down."
+    end
+  end
+
+<% module_path.each do |_| %>
+<%   indent = indent - 2 %>
+<%=  (" "*indent) + "end\n" %>
+<% end %>

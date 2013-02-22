@@ -37,7 +37,7 @@ module Climax
             # Create standard bundler gem layout
             %x[bundle gem #{name}]
             # Add a couple extra directories
-            FileUtils.mkpath(["#{name}/bin", "#{name}/features", "#{name}/pkg"])
+            FileUtils.mkpath(["#{name}/bin", "#{name}/features/support", "#{name}/features/step_definitions", "#{name}/pkg"])
 
             # Get bundler generated module path
             gemspec = File.read("#{name}/#{name}.gemspec")
@@ -47,18 +47,29 @@ module Climax
             template_dir = File.join(File.dirname(__FILE__), "..", "..", "..", "templates")
 
             File.open("#{name}/bin/#{name}", "w") do |file|
-              file.write(ERB.new(File.read(File.join(template_dir, "application_wrapper.erb")), 0, '<>').result(binding))
+              file.write(ERB.new(File.read(File.join(template_dir, "bin", "application.rb.erb")), 0, '<>').result(binding))
             end
 
             FileUtils.chmod "+x", "#{name}/bin/#{name}"
 
             File.open("#{name}/lib/#{name}.rb", "w") do |file|
-              file.write(ERB.new(File.read(File.join(template_dir, "application.rb.erb")), 0, '<>').result(binding))
+              file.write(ERB.new(File.read(File.join(template_dir, "lib", "application.rb.erb")), 0, '<>').result(binding))
             end
 
-            gemspec.gsub!(/^end$/, "  gem.add_development_dependency \"cucumber\"\n  gem.add_runtime_dependency \"climax\"\nend")
+            gemspec.gsub!(/^end$/, "  gem.add_development_dependency \"cucumber\"\n  gem.add_development_dependency \"rspec\"\n  gem.add_runtime_dependency \"climax\"\nend")
             File.open("#{name}/#{name}.gemspec", "w") do |file|
               file.write(gemspec)
+            end
+
+            File.open("#{name}/features/support/env.rb", "w") do |file|
+              file.write(ERB.new(File.read(File.join(template_dir, "features", "support", "env.rb.erb")), 0, '<>').result(binding))
+            end
+
+            FileUtils.cp(File.join(template_dir, "features", "support", "io.rb"), "#{name}/features/support/io.rb")
+
+            in_directory(name) do
+              %x[git add .]
+              %x[git commit -m 'Initial project']
             end
 
           end
