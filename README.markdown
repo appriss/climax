@@ -210,3 +210,27 @@ The three files you will want to modify are `README.md` (with info about your ap
 `<project-name>.gemspec` and `lib/<project-name>.rb`.
 
 You can bundle your application with `gem bundle *.gemspec`.
+
+Control DRb
+===========
+
+The Control DRb provides a way to interact with your running application.  In future releases expect
+new functionality to be added to the Control DRb and expect new ways of interacting with your long
+running jobs.
+
+You control your application with `climax control`.  Simply pass `climax control` the name of the
+command you wish to send to your application and any optional arguments.  If your application is
+using a different port than the default (7249) you can tell climax which port to connect on with the
+`-p <port>` option:
+
+    climax control -p 1234 start_debugger
+
+Starting the Debugger
+---------------------
+
+To attach to your running application with a debugger, simply make sure your application is running
+and then execute:
+
+    climax control start_debugger
+
+When you are finished type `quit` to exit the debugger and resume your application.  
