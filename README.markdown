@@ -207,8 +207,6 @@ Your new application has the boilerplate code necessary to start running your ap
 Running the application will simply print `"Hello World"` until you hit `Ctrl-C`.
 
 The three files you will want to modify are `README.md` (with info about your application),
-`*<project-name>*.gemspec` and `lib/*<project-name>*.rb`.
-
-There are some basic cucumber tests provided for you.  Just run `cucumber` to see those tests run.
+`<project-name>.gemspec` and `lib/<project-name>.rb`.
 
 You can bundle your application with `gem bundle *.gemspec`.
