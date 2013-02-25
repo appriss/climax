@@ -3,4 +3,16 @@
 $:.unshift File.expand_path("../../lib", __FILE__)
 require "rubygems" rescue nil
 require "<%= name %>"
-<%= module_string %>::Application.new(ARGV).run
+app = <%= module_string %>::Application.new(ARGV)
+received_ctrlc = false
+trap("INT") do
+  if received_ctrlc == false
+    app.log.info "Received Interrupt.  Attempting to exit safely.  Send Interrupt again to quit abruptly."
+    app.send_event(:quit)
+    received_ctrlc = true
+  else
+    app.log.fatal "Aborting!"
+    exit 1
+  end
+end
+app.run
