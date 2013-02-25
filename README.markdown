@@ -127,9 +127,9 @@ your `main` method completes, any existing events in the queue are processed.  Y
 then called again.  This process goes on until the `main` method returns a value other than nil or
 an `:exit` or `:quit` event is placed in the event queue.
 
-Your application can send events to the climax event queue with the `send_event` method.  You must
-pass `send_event` the event type (e.g., `:exit` or `:start_remote_debugger`) and you may also
-optionally pass a payload (i.e., extra data) as a second parameter.
+Your application can send events to the climax event queue with the `climax_send_event` method.  You
+must pass `climax_send_event` the event type (e.g., `:exit` or `:start_remote_debugger`) and you may
+also optionally pass a payload (i.e., extra data) as a second parameter.
 
 For example, if you wish for your application to exit in an orderly fashion **after** the current
 iteration of `main` has had a chance to finish, you can accomplish this by placing an `:exit` event
@@ -143,7 +143,7 @@ off of the queue it will call your `post_main` method and perform other cleanup 
       include Climax::Application
       
       def main
-        send_event(:exit) if about_to_meet_work_quota?
+        climax_send_event(:exit) if about_to_meet_work_quota?
         work = get_some_work
         do_work(work)
         return nil
@@ -162,6 +162,9 @@ debugger will not begin until the current iteration of `main` has completed.
 This is excellent for stopping a long running process without interrupting its work.  By sending an
 :exit or :quit event, whether through the Control DRb or from your application itself, your
 application will be allowed to finish processing its current unit of work before exiting.
+
+For your convenience there is also a 'climax_has_event?' method that returns true only if there are
+events waiting on the event queue.
 
 Generating a New Application
 ============================

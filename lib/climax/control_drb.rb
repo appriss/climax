@@ -11,11 +11,11 @@ module Climax
     end
 
     def log_level= (level)
-      @app.send_event(:set_log_level, level)
+      @app.climax_send_event(:set_log_level, level)
     end
 
     def start_debugger
-      @app.send_event(:start_remote_debugger)
+      @app.climax_send_event(:start_remote_debugger)
     end
   end
 

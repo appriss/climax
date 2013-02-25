@@ -181,9 +181,15 @@ module Climax
       end
     end
 
-    def send_event (type, payload=nil)
+    def climax_send_event (type, payload=nil)
       _events_mutex.synchronize {
         _events.unshift OpenStruct.new(:type => type, :payload => payload)
+      }
+    end
+
+    def climax_has_event?
+      _events_mutex.synchronize {
+        _events.count > 1
       }
     end
 
