@@ -32,7 +32,7 @@ module Climax
 
     def _post_main
       log.debug "Stopping Control DRb"
-      @control_drb.stop_service
+      DRb.stop_service
     end
 
     def _parse_options
@@ -169,7 +169,7 @@ module Climax
           unless event.nil?
             case event.type
             when :set_log_level then log_level = event.payload
-            when :stop_control_drb then @control_drb && @control_drb.stop_service
+            when :stop_control_drb then DRb.stop_service
             when :start_remote_debugger then binding.remote_pry rescue nil
             when :quit, :exit then return 0
             end
