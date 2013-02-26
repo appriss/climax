@@ -246,3 +246,31 @@ and then execute:
     climax control start_debugger
 
 When you are finished type `quit` to exit the debugger and resume your application.  
+
+Extending the Control DRb with Custom Functionality
+---------------------------------------------------
+
+Adding your own commands to the Control DRb couldn't be easier.  Simply extend the
+`Climax::ControlServer` class with your own methods.  Let's see an example.  Let's suppose that
+you'd like to be able to see statistics about your application as it is running.  You'd like to be
+able to query your application at any time to get a snapshot of current work statistics.  Let's
+extend the `Climax::ControlServer` class with a simple method that does this:
+
+    module Climax
+      class ControlServer
+        def get_statistics
+          app.log.info "STATS: I have processed #{app.work_units_completed} units of work since startup."
+          app.log.info "STATS: I have processed #{app.work_units_last_5_minutes} units of work in the last 5 minutes."
+          app.log.info "STATS: I spend an average of #{app.work_units_average_time} seconds for each work unit."
+        end
+      end
+    end
+
+Notice that when you are extending `Climax::ControlServer` you have access to your application via
+the `app` method.  From here you can call any publicly available methods on your application.  But
+be careful.  The DRb is running in a separate thread.  If you wish to *manipulate* your application
+from the DRb while it is running you will need to make these parts of your application thread-safe.
+
+Now we can easily send this new command (`get_statistics`) to your application while it is running:
+
+    climax control get_statistics

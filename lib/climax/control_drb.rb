@@ -2,20 +2,23 @@ require 'drb/drb'
 
 module Climax
   class ControlServer
+
     def initialize(app)
       @app = app
     end
 
+    attr_reader :app
+
     def log_level
-      @app.log_level
+      app.log_level
     end
 
     def log_level= (level)
-      @app.climax_send_event(:set_log_level, level)
+      app.climax_send_event(:set_log_level, level)
     end
 
     def start_debugger
-      @app.climax_send_event(:start_remote_debugger)
+      app.climax_send_event(:start_remote_debugger)
     end
   end
 
