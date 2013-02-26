@@ -250,27 +250,82 @@ When you are finished type `quit` to exit the debugger and resume your applicati
 Extending the Control DRb with Custom Functionality
 ---------------------------------------------------
 
-Adding your own commands to the Control DRb couldn't be easier.  Simply extend the
-`Climax::ControlServer` class with your own methods.  Let's see an example.  Let's suppose that
-you'd like to be able to see statistics about your application as it is running.  You'd like to be
-able to query your application at any time to get a snapshot of current work statistics.  Let's
-extend the `Climax::ControlServer` class with a simple method that does this:
+Extending the Control DRb is a key aspect of climax.  For instance it is a common idiom for web
+applications to delegate difficult tasks to background jobs.  Let's take a common scenario and see
+how we might implement this scenario with climax.
 
-    module Climax
-      class ControlServer
-        def get_statistics
-          app.log.info "STATS: I have processed #{app.work_units_completed} units of work since startup."
-          app.log.info "STATS: I have processed #{app.work_units_last_5_minutes} units of work in the last 5 minutes."
-          app.log.info "STATS: I spend an average of #{app.work_units_average_time} seconds for each work unit."
-        end
-      end
+In this example there is a web application that allows users to upload images.  The image is stored
+in a temporary directory by the web application and then a request is sent to a background job
+asking it to process the image and store it in a more permanent location.  Let's say the web
+application simply wants to send the command `process_image` and pass as an argument the path of the
+image that was uploaded.
+
+Let's see how we can extend the Control DRb with a `process_image` method.  We'll also see a possible
+workflow for how the background job might tackle its work.
+
+require 'climax'
+require 'fileutils'
+
+module Climax
+  class ControlServer
+    def process_image (path)
+      app.climax_send_event(:process_image, path)
+    end
+  end
+end
+
+class ImageProcessor
+  include Climax::Application
+
+  def configure
+    options do
+      on 't', 'target-directory=', 'Destination directory to save processed images to.', :default => '/var/saved/images'
+    end
+  end
+
+  def pre_main
+    FileUtils.mkdir_p(opts[:'target-directory'])
+	@processor_queue = []
+  end
+
+  def main
+    if @processor_queue.empty?
+      sleep 0.5
+      return nil
     end
 
-Notice that when you are extending `Climax::ControlServer` you have access to your application via
-the `app` method.  From here you can call any publicly available methods on your application.  But
-be careful.  The DRb is running in a separate thread.  If you wish to *manipulate* your application
-from the DRb while it is running you will need to make these parts of your application thread-safe.
+    image_path = @processor_queue.pop
+	log.info "Processing image #{image_path}"
+    do_work(image_path)
+	return nil
+  end
 
-Now we can easily send this new command (`get_statistics`) to your application while it is running:
+  def process_image (path)
+    @processor_queue.push(path)
+  end
 
-    climax control get_statistics
+  def do_work(path)
+    # process image at path
+    # save to target directory
+  end
+end
+
+Adding your own commands to the Control DRb couldn't be easier.  Simply extend the
+`Climax::ControlServer` class with your own methods that push events onto the climax event queue.
+When climax processes the event it will call a method in your application instance with the same
+name as the event.  In the example above we send a `:process_image` event with an argument.  When
+climax processes this event it will attempt to call a `process_image` method in the application
+instance, passing along any arguments.
+
+In this case we simply add the work to a simple queue and allow `main` to process the jobs from the
+queue.
+
+Notice that when you are extending `Climax::ControlServer` you have access to your application
+instance via the `app` method.  From here you can call any publicly available methods on your
+application instance.  *But be careful*.  The DRb is running in a separate thread.  This is why we
+simply send events!  It is always best to only send events from your custom ControlServer methods.
+Doing so allows you to never need worry about making your application thread-safe.  If you're a
+cowboy and decide to call various public methods on your app instance directly from your custom
+`ControlServer` methods you may end up with some strange results.  So unless you are familiar with
+thread-safe applications it is suggested that you only place events onto the queue from your custom
+`ControlServer` methods.

@@ -172,6 +172,8 @@ module Climax
             when :stop_control_drb then DRb.stop_service
             when :start_remote_debugger then binding.remote_pry rescue nil
             when :quit, :exit then return 0
+            else
+              self.send(event.type, *[event.payload])
             end
           end
         end while !event.nil?
