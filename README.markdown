@@ -111,7 +111,7 @@ method in this example always returns nil, this application will run forever unt
 externally (`Ctrl-C`, `kill`, or using the Control DRb).  Using `Ctrl-C` and `kill -INT` (i.e.,
 sending an Interrupt signal) will cause the application to exit gracefully. The current iteration of
 `main` will finish and then `post_main` will be run.  You can send another Interrupt signal, for
-example by hitting Ctrl-C twice, to exit the application immediately.  Likewise if the Control DRb
+example by hitting `Ctrl-C` twice, to exit the application immediately.  Likewise if the Control DRb
 is used then the application will exit in an orderly fashion and the `post_main` method will be
 called.  Notice that for free you can fork this application, change the log level with the
 `--log-level` option, write the logs to a file using the `--log-file` option, and you can start a
@@ -161,17 +161,19 @@ good idea to keep each iteration of `main` as short as possible, although this i
 requirement.  In other words, if you wish to enter the remote debugger for a running process, the
 debugger will not begin until the current iteration of `main` has completed.
 
-This is exactly how graceful exiting is accomplished with Climax.  When you send an Interrupt signal
-(via `Ctrl-C` or by sending a `kill -INT` to your application, Climax intercepts this signal and
-places a `:exit` event onto the event queue.  If Climax intercepts a second Interrupt signal it will
+This is exactly how graceful exiting is accomplished with climax.  When you send an Interrupt signal
+(via `Ctrl-C` or by sending a `kill -INT` to your application), climax intercepts this signal and
+places a `:exit` event onto the event queue.  If climax intercepts a second Interrupt signal it will
 halt execution immediately.
 
 This is excellent for stopping a long running process without interrupting its work.  By sending an
-:exit or :quit event, whether through the Control DRb or from your application itself, your
-application will be allowed to finish processing its current unit of work before exiting.
+:exit or :quit event, whether through the Control DRb, or by sending an Interrupt signal, or from
+your application itself, your application will be allowed to finish processing its current unit of
+work before exiting.
 
 For your convenience there is also a 'climax_has_event?' method that returns true only if there are
-events waiting on the event queue.
+events waiting on the event queue.  Your application can use this to determine if `main` should give
+up control temporarily to allow climax to handle events on the queue.
 
 Generating a New Application
 ============================
