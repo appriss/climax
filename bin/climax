@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 $:.unshift File.join(File.dirname(__FILE__), "..", "lib")
 require 'rubygems' rescue nil
+require 'bundler/setup'
 require 'climax/cli'
 Climax::CLI::Application.new(ARGV)

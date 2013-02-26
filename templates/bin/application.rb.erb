@@ -2,6 +2,7 @@
 # -*- mode: ruby -*-
 $:.unshift File.expand_path("../../lib", __FILE__)
 require "rubygems" rescue nil
+require 'bundler/setup'
 require "<%= name %>"
 app = <%= module_string %>::Application.new(ARGV)
 received_ctrlc = false
