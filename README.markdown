@@ -108,7 +108,7 @@ The above example is a simple application that adds an extra command line option
 `configure` method.  The `pre_main` method is simple and just writes a debug log statement.  As you
 can see logging has been setup at this point.  Then the `main` method is called.  Because the `main`
 method in this example always returns nil, this application will run forever until it is stopped
-externally (`Ctrl-C`, `kill`, or using the Control DRb).  Using `Ctrl-C` and `kill -2` (i.e.,
+externally (`Ctrl-C`, `kill`, or using the Control DRb).  Using `Ctrl-C` and `kill -INT` (i.e.,
 sending an Interrupt signal) will cause the application to exit gracefully. The current iteration of
 `main` will finish and then `post_main` will be run.  You can send another Interrupt signal, for
 example by hitting Ctrl-C twice, to exit the application immediately.  Likewise if the Control DRb
