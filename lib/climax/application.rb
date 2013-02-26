@@ -191,7 +191,7 @@ module Climax
 
     def climax_has_event?
       _events_mutex.synchronize {
-        _events.count > 1
+        _events.count > 0
       }
     end
 
