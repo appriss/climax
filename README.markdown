@@ -108,10 +108,12 @@ The above example is a simple application that adds an extra command line option
 `configure` method.  The `pre_main` method is simple and just writes a debug log statement.  As you
 can see logging has been setup at this point.  Then the `main` method is called.  Because the `main`
 method in this example always returns nil, this application will run forever until it is stopped
-externally (`Ctrl-C`, `kill -9`, or using the Control DRb).  Using `Ctrl-C` and `kill -9` will
-immediately halt execution of the application and `post_main` will never be called.  However if the
-Control DRb is used then the application will exit in an orderly fashion and the `post_main` method
-will be called.  Notice that for free you can fork this application, change the log level with the
+externally (`Ctrl-C`, `kill`, or using the Control DRb).  Using `Ctrl-C` and `kill -2` (i.e.,
+sending an Interrupt signal) will cause the application to exit gracefully. The current iteration of
+`main` will finish and then `post_main` will be run.  You can send another Interrupt signal, for
+example by hitting Ctrl-C twice, to exit the application immediately.  Likewise if the Control DRb
+is used then the application will exit in an orderly fashion and the `post_main` method will be
+called.  Notice that for free you can fork this application, change the log level with the
 `--log-level` option, write the logs to a file using the `--log-file` option, and you can start a
 debugger at any time while this application is running using the Control DRb.  The Control DRb has a
 lot of power.  We'll talk about it more below.
@@ -158,6 +160,11 @@ processed until the current iteration of `main` has had a chance to complete.  T
 good idea to keep each iteration of `main` as short as possible, although this is certainly not a
 requirement.  In other words, if you wish to enter the remote debugger for a running process, the
 debugger will not begin until the current iteration of `main` has completed.
+
+This is exactly how graceful exiting is accomplished with Climax.  When you send an Interrupt signal
+(via `Ctrl-C` or by sending a `kill -INT` to your application, Climax intercepts this signal and
+places a `:exit` event onto the event queue.  If Climax intercepts a second Interrupt signal it will
+halt execution immediately.
 
 This is excellent for stopping a long running process without interrupting its work.  By sending an
 :exit or :quit event, whether through the Control DRb or from your application itself, your
