@@ -263,52 +263,52 @@ image that was uploaded.
 Let's see how we can extend the Control DRb with a `process_image` method.  We'll also see a possible
 workflow for how the background job might tackle its work.
 
-require 'climax'
-require 'fileutils'
-
-module Climax
-  class ControlServer
-    def process_image (path)
-      app.climax_send_event(:process_image, path)
+    require 'climax'
+    require 'fileutils'
+    
+    module Climax
+      class ControlServer
+        def process_image (path)
+          app.climax_send_event(:process_image, path)
+        end
+      end
     end
-  end
-end
-
-class ImageProcessor
-  include Climax::Application
-
-  def configure
-    options do
-      on 't', 'target-directory=', 'Destination directory to save processed images to.', :default => '/var/saved/images'
+    
+    class ImageProcessor
+      include Climax::Application
+    
+      def configure
+        options do
+          on 't', 'target-directory=', 'Destination directory to save processed images to.', :default => '/var/saved/images'
+        end
+      end
+    
+      def pre_main
+        FileUtils.mkdir_p(opts[:'target-directory'])
+        @processor_queue = []
+      end
+    
+      def main
+        if @processor_queue.empty?
+          sleep 0.5
+          return nil
+        end
+    
+        image_path = @processor_queue.pop
+        log.info "Processing image #{image_path}"
+        do_work(image_path)
+        return nil
+      end
+    
+      def process_image (path)
+        @processor_queue.push(path)
+      end
+    
+      def do_work(path)
+        # process image at path
+        # save to target directory
+      end
     end
-  end
-
-  def pre_main
-    FileUtils.mkdir_p(opts[:'target-directory'])
-	@processor_queue = []
-  end
-
-  def main
-    if @processor_queue.empty?
-      sleep 0.5
-      return nil
-    end
-
-    image_path = @processor_queue.pop
-	log.info "Processing image #{image_path}"
-    do_work(image_path)
-	return nil
-  end
-
-  def process_image (path)
-    @processor_queue.push(path)
-  end
-
-  def do_work(path)
-    # process image at path
-    # save to target directory
-  end
-end
 
 Adding your own commands to the Control DRb couldn't be easier.  Simply extend the
 `Climax::ControlServer` class with your own methods that push events onto the climax event queue.
@@ -329,3 +329,21 @@ cowboy and decide to call various public methods on your app instance directly f
 `ControlServer` methods you may end up with some strange results.  So unless you are familiar with
 thread-safe applications it is suggested that you only place events onto the queue from your custom
 `ControlServer` methods.
+
+Now the web application can simply connect to your application's DRb and call the `process_image`
+method, passing it an image path.
+
+Something interesting about this is that non-ruby applications can also easily tell our image
+processor to process images.
+
+For instance you can send commands to your application using the `climax` CLI interface:
+
+    climax control process_image /tmp/uploaded-images/tmp-d8ej2.jpg
+
+This means any application, even just simple shell scripts, can easily send commands to our
+background job.
+
+Of course it is best to give each of your climax applications a unique Control DRb port.  You can
+then specify which port to send commands to with the `-p` option to `climax control`:
+
+    climax control -p $IMAGE_PROCESSOR_PORT process_image /tmp/uploaded-images/tmp-d8ej2.jpg
