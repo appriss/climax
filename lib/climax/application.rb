@@ -36,7 +36,7 @@ module Climax
     end
 
     def _parse_options
-      slop.parse!
+      slop.parse!(@args)
       @opts = slop
       exit 0 if opts.help?
     rescue => e
