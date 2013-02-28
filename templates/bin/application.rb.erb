@@ -9,7 +9,7 @@ app = <%= module_string %>::Application.new(ARGV)
 received_ctrlc = false
 trap("INT") do
   if received_ctrlc == false
-    app.log.info "Received Interrupt.  Attempting to exit safely.  Send Interrupt again to quit abruptly."
+    app.log.warn "Received Interrupt.  Attempting to exit safely.  Send Interrupt again to quit abruptly."
     app.climax_send_event(:quit)
     received_ctrlc = true
   else
