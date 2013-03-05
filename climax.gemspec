@@ -26,5 +26,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "slop"
   s.add_runtime_dependency "rspec"
   s.add_runtime_dependency "cucumber"
-  s.add_runtime_dependency "pry-remote"
+  s.add_runtime_dependency "pry-remote", '>= 0.1.7'
 end
