@@ -20,6 +20,12 @@ module Climax
     def start_debugger
       app.climax_send_event(:start_remote_debugger)
     end
+
+    def quit
+      app.climax_send_event(:quit)
+    end
+    alias quit exit
+
   end
 
   class ControlDRb
