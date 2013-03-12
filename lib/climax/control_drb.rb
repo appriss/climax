@@ -21,10 +21,9 @@ module Climax
       app.climax_send_event(:start_remote_debugger)
     end
 
-    def quit
+    def stop
       app.climax_send_event(:quit)
     end
-    alias quit exit
 
   end
 
