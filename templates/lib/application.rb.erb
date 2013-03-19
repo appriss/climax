@@ -11,13 +11,13 @@ require "<%= name %>/version"
     include Climax::Application
 
     def configure
-      # options do
-      #   on 'v', 'verbose', 'More verbose'
-      # end
+      options do
+        on 'v', 'verbose', 'More verbose'
+      end
     end
 
     def pre_main
-      # log.debug "Application has is about to run"
+      log.info "STARTING" if opts[:verbose]
     end
 
     def main
@@ -27,7 +27,7 @@ require "<%= name %>/version"
     end
 
     def post_main
-      # log.debug "Application is shutting down."
+      log.info "FINISHED" if opts[:verbose]
     end
   end
 
