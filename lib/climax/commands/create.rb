@@ -50,7 +50,7 @@ module Climax
               file.write(ERB.new(File.read(File.join(template_dir, "bin", "application.rb.erb")), 0, '<>').result(binding))
             end
 
-            FileUtils.chmod "+x", "#{name}/bin/#{name}"
+            FileUtils.chmod 0755, "#{name}/bin/#{name}"
 
             File.open("#{name}/lib/#{name}.rb", "w") do |file|
               file.write(ERB.new(File.read(File.join(template_dir, "lib", "application.rb.erb")), 0, '<>').result(binding))
