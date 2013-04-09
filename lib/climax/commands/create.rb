@@ -41,7 +41,8 @@ module Climax
 
             # Get bundler generated module path
             gemspec = File.read("#{name}/#{name}.gemspec")
-            module_string = /gem.version\s+=\s+(.*)::VERSION/.match(gemspec)[1]
+            param = /Gem::Specification.new do \|(.*)\|/.match(gemspec)[1]
+            module_string = /#{param}.version\s+=\s+(.*)::VERSION/.match(gemspec)[1]
             module_path = module_string.split("::")
 
             template_dir = File.join(File.dirname(__FILE__), "..", "..", "..", "templates")
@@ -56,7 +57,7 @@ module Climax
               file.write(ERB.new(File.read(File.join(template_dir, "lib", "application.rb.erb")), 0, '<>').result(binding))
             end
 
-            gemspec.gsub!(/^end$/, "  gem.add_development_dependency \"cucumber\"\n  gem.add_development_dependency \"rspec\"\n  gem.add_runtime_dependency \"climax\"\nend")
+            gemspec.gsub!(/^end$/, "  #{param}.add_development_dependency \"cucumber\"\n  #{param}.add_development_dependency \"rspec\"\n  #{param}.add_runtime_dependency \"climax\"\nend")
             File.open("#{name}/#{name}.gemspec", "w") do |file|
               file.write(gemspec)
             end
