@@ -15,6 +15,7 @@ module Climax
         on :log_level=,    "Set to debug, info, warn, error, or fatal.  Default: info.", :default => "info"
         on :log_file=,     "File to log output to.  By default logs to stdout.", :default => nil
         on :control_port=, "Override the port for the control DRb to listen on.  Default is 7249", :as => :int, :default => 7249
+        on :control_hostname=, "Override the hostname for the control DRb to listen on.  Default is localhost", :default => 'localhost'
       end
       configure
       _parse_options
@@ -26,8 +27,8 @@ module Climax
         log.debug "Running in background (#{$$})"
       end
 
-      log.debug "Starting Control DRb on port #{control_port}"
-      @control_drb = Climax::ControlDRb.new(self, control_port)
+      log.debug "Starting Control DRb on #{control_hostname}:#{control_port}"
+      @control_drb = Climax::ControlDRb.new(self, control_port, control_hostname)
     end
 
     def _post_main
@@ -73,6 +74,15 @@ module Climax
     def control_port= (port)
       raise "Cannot set control port to #{port}: ControlDRb is already running!" if @control_drb
       @control_port = port
+    end
+    
+    def control_hostname
+      @control_hostname ||= opts[:control_hostname]
+    end
+
+    def control_hostname= (hostname)
+      raise "Cannot set control hostname to #{hostname}: ControlDRb is already running!" if @control_drb
+      @control_hostname = hostname
     end
 
     def log_file

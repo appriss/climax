@@ -28,10 +28,11 @@ module Climax
   end
 
   class ControlDRb
-    def initialize(app, port)
+    def initialize(app, port, hostname)
       @port = port
+      @uri = "druby://#{hostname}:#{@port}"
       server = ControlServer.new(app)
-      DRb.start_service(uri, server)
+      DRb.start_service(@uri, server)
     end
 
     def port
@@ -39,7 +40,7 @@ module Climax
     end
 
     def uri
-      "druby://localhost:#{port}"
+      @uri
     end
 
   end
