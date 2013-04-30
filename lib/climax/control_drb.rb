@@ -28,14 +28,10 @@ module Climax
   end
 
   class ControlDRb
-    def initialize(app, port, hostname, safe=(hostname != 'localhost'))
+    def initialize(app, port, hostname)
       @port = port
       @uri = "druby://#{hostname}:#{@port}"
       server = ControlServer.new(app)
-      #
-      if safe
-        $SAFE = 1
-      end
       DRb.start_service(@uri, server)
     end
 
