@@ -17,6 +17,8 @@ module Climax
         on :control_port=, "Override the port for the control DRb to listen on.  Default is 7249", :as => :int, :default => 7249
         on :control_hostname=, "Override the hostname for the control DRb to listen on.  Default is localhost", :default => 'localhost'
       end
+      @stats = {}
+      @delay, @paused = nil, false
       configure
       _parse_options
     end
@@ -137,6 +139,7 @@ module Climax
 
     # Run the application
     def run
+      set_stat(:run_start, Time.now)
       _pre_main
       pre_main
       @exit_status = _event_loop
@@ -171,8 +174,8 @@ module Climax
     end
 
     def _event_loop
+      count = 0
       while true
-
         begin
           event = _next_event
 
@@ -181,15 +184,30 @@ module Climax
             when :set_log_level then log_level = event.payload
             when :stop_control_drb then DRb.stop_service
             when :start_remote_debugger then binding.remote_pry rescue nil
+            when :set_delay then @delay = event.payload
+            when :pause then @paused = true
+            when :resume then @paused = false
             when :quit, :exit then return 0
             else
               self.send(event.type, *[event.payload])
             end
           end
         end while !event.nil?
-
-        result = main
-        return result if !result.nil?
+        
+        if @paused
+          sleep 1
+          next
+        end
+        
+        if @delay.nil? || (count == @delay)
+          result = main
+          bump_stat(:iterations)
+          return result if !result.nil?
+          count = 0
+        elsif @delay
+          sleep 1
+          count += 1
+        end
       end
     end
 
@@ -231,6 +249,38 @@ module Climax
 
     def post_main
     end
+    
+    def set_delay(delay)
+      @delay = delay
+    end
+    
+    def paused?
+      return @paused
+    end
+    
+    ###################################
+    # stat tracking methods
+    ###################################
+    
+    def stats
+      return @stats
+    end
+        
+    def get_stat(key)
+      return @stats[key]
+    end
 
+    def set_stat(key, value)
+      return @stats[key] = value
+    end
+    
+    def bump_stat(key, increment = 1)
+      if @stats[key]
+        return @stats[key] += increment
+      else
+        return @stats[key] = increment
+      end
+    end
+    
   end
 end

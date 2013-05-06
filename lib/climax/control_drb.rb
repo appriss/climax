@@ -24,6 +24,29 @@ module Climax
     def stop
       app.climax_send_event(:quit)
     end
+    
+    def set_delay(delay)
+      delay = nil if delay == 0
+      app.climax_send_event(:set_delay, delay)
+    end
+    
+    def pause
+      app.climax_send_event(:pause)
+    end
+    
+    def resume
+      app.climax_send_event(:resume)
+    end
+    
+    def stats
+      stats = app.stats
+      sec_per_run = (Time.now - stats[:run_start])/stats[:iterations]
+      stats.merge({:seconds_per_iteration => sec_per_run})
+    end
+    
+    def paused?
+      app.paused?
+    end
 
   end
 
