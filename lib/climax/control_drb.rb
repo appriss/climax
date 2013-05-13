@@ -40,6 +40,7 @@ module Climax
     
     def stats
       stats = app.stats
+      #this can cause an error if checked before there was an iteration
       sec_per_run = (Time.now - stats[:run_start])/stats[:iterations]
       stats.merge({:seconds_per_iteration => sec_per_run})
     end
