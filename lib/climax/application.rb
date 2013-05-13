@@ -178,7 +178,7 @@ module Climax
     end
 
     def _event_loop
-      count = 0
+      count = @delay || 0 #set count to delay value so first main block is run immeadiately
       while true
         begin
           event = _next_event
