@@ -25,7 +25,7 @@ module Climax
 
     def _pre_main
       if daemonize?
-        return nil if !Process.fork.nil?
+        exit if !Process.fork.nil?
         log.debug "Running in background (#{$$})"
       else
         log.debug 'Running in foreground'
@@ -143,8 +143,7 @@ module Climax
 
     # Run the application
     def run
-      drb = _pre_main
-      return true unless drb.is_a? Climax::ControlDRb
+      _pre_main
       pre_main
       @exit_status = _event_loop
       _post_main
